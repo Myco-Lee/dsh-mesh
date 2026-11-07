@@ -2,7 +2,7 @@
 // Standalone mesh node: runs the same runtime as the plugin without a DSH host.
 // Useful for headless servers, CI, or when the desktop host cannot be restarted.
 //
-//   node bin/mesh-node.mjs --root "\\\\192.168.8.164\\dsh-mesh" --node LMM-1 \
+//   node bin/mesh-node.mjs --root "\\\\<mesh-host>\\dsh-mesh" --node LMM-1 \
 //        --role auto --profile mesh-worker --concurrency 2
 
 import process from 'node:process';

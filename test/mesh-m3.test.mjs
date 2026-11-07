@@ -128,7 +128,7 @@ async function testCapabilityRouting() {
   try {
     writeHeartbeat(paths, {
       node: 'remote-img',
-      address: '192.168.8.99',
+      address: '203.0.113.99',
       httpPort: 48902,
       caps: ['text', 'image'],
       capSlots: { image: 1 },
@@ -162,7 +162,7 @@ async function testCapSlots() {
   try {
     writeHeartbeat(paths, {
       node: 'remote-img-one',
-      address: '192.168.8.98',
+      address: '203.0.113.98',
       httpPort: 48902,
       caps: ['text', 'image'],
       capSlots: { image: 1 },

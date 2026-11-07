@@ -59,7 +59,7 @@ dsh --profile mesh-worker --from-default-profile headless headless "只回复 ok
 # 2) profile 的 cordis.patch.yml 末尾
 - id: dsh-mesh
   config:
-    root: '\\192.168.8.164\dsh-mesh'   # 共享目录；本机就是 D:\dsh-mesh
+    root: '\\<mesh-host>\dsh-mesh'      # 共享目录；本机就是 D:\dsh-mesh
     node: LMM-1                        # 唯一节点名（默认主机名）
     role: auto                         # auto | coordinator | worker | client
     workerProfile: mesh-worker
@@ -140,7 +140,7 @@ dsh --profile mesh-worker --from-default-profile headless headless "只回复 ok
 ## 无桌面宿主时跑一个节点
 
 ```powershell
-node bin/mesh-node.mjs --root "\\192.168.8.164\dsh-mesh" --node LMM-3 `
+node bin/mesh-node.mjs --root "\\<mesh-host>\dsh-mesh" --node LMM-3 `
   --exe "D:\99-DP\DeepSeek Harness.exe" `
   --cli "D:\99-DP\resources\app.asar\dsh\node_modules\@deepseek-ai\dsh-desktop-host\lib\cli.js"
 ```

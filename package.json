@@ -30,5 +30,22 @@
   "engines": {
     "node": ">=18"
   },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "agent-mesh",
+    "distributed",
+    "dag",
+    "leases"
+  ],
+  "author": "Myco-Lee",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Myco-Lee/dsh-mesh.git"
+  },
+  "homepage": "https://github.com/Myco-Lee/dsh-mesh#readme",
+  "bugs": {
+    "url": "https://github.com/Myco-Lee/dsh-mesh/issues"
+  },
   "license": "MIT"
 }
