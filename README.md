@@ -74,12 +74,26 @@ dsh --profile mesh-worker --from-default-profile headless headless "只回复 ok
 
 | 工具 | 作用 |
 | --- | --- |
-| `mesh_submit` | 提交 DAG 计划：`{ goal, steps:[{id,title,instruction,dependsOn?,caps?,serial?}] }` |
+| `mesh_plan` | 用内置模板（`research` / `novel` / `drama` / `code`）生成计划；`submit=true` 才真正提交 |
+| `mesh_submit` | 提交 DAG 计划：`{ goal, steps:[{id,title,instruction,dependsOn?,caps?,serial?,priority?}] }` |
 | `mesh_tasks` | 列任务 / 查单个任务的分步状态、执行节点、重试次数 |
-| `mesh_status` | 集群视角：协调器是谁、存活对端、本机并发、任务计数 |
+| `mesh_status` | 集群视角：协调器、存活节点与能力/槽位、队列与背压、本机按通道占用 |
 | `mesh_cancel` | 取消任务（已在跑的步骤会跑完，不再派新步骤） |
 
 指令里可以写 `{{step:s1}}`：依赖步骤的产物会自动内联（超长时改为落 `inputs/s1.md` 让执行端自己读）。
+
+### 能力与模板（M3）
+
+- **能力标签**：步骤可声明 `caps: ['image']`，只有心跳里报告了该能力的节点才接。没能力的节点不会被派到。
+- **通道槽位**：`capSlots: { image: 1 }` 表示本机同时只跑 1 个 image 步骤；`maxConcurrent` 仍是总闸。
+- **背压**：未完成步骤总数超过 `maxQueuedSteps` 时暂停派单，已派出的照常跑完。
+- **优先级**：`priority` 数字越小越先派（默认 50）。
+- **模板**：`mesh_plan` 把「提纲→并行分节→核验→去 AI 腔→拼装」这类套路固化下来，省掉手写 20 步计划。
+
+```jsonc
+// 调研/论文：sections 决定并行度，material 可指向本地语料目录
+{ "template": "research", "goal": "国际制裁的反制", "sections": ["问题的提出", "规范基础", "比较法"], "target": "30000 字", "submit": true }
+```
 
 ## 配置项
 
@@ -97,12 +111,19 @@ dsh --profile mesh-worker --from-default-profile headless headless "只回复 ok
 | `maxContextChars` | 6000 | 依赖产物内联进指令的上限 |
 | `apiKeyFile` | 空 | 执行端 API key 文件（YAML/JSON 里有 `DEEPSEEK_API_KEY` 即可） |
 | `dshExe` / `dshCli` | 自动 | 桌面端自动推导 Electron + cli.js；CLI 端需要显式传 |
+| `caps` | `['text']` | 本机能接的通道，如 `['text','image','code']` |
+| `capSlots` | `{}` | 每通道并发上限，如 `{ image: 1 }`；未列出的通道只受 `maxConcurrent` 约束 |
+| `maxQueuedSteps` | 200 | 未完成步骤总数上限，超过则暂停派单（背压） |
+| `heartbeatMs` | 30000 | 节点心跳间隔（写 `nodes/<node>.json`） |
+| `nodeTtlMs` | 90000 | 心跳超时即视为离线，不再派单给它 |
+| `address` / `httpPort` | 空 / 0 | 广播自己的控制面地址（可选，供后续远程调用） |
 
 ## 运行期文件
 
 ```
 <root>/
   coord/lease.json                 协调器租约
+  nodes/<node>.json                节点心跳（能力 caps、槽位 capSlots、并发、角色）
   ledger/<node>/events.jsonl       每节点事件账本（dispatch/commit/fail/lease）
   tasks/<taskId>/plan.json         计划
   tasks/<taskId>/task.json         元信息与状态
@@ -128,6 +149,7 @@ node bin/mesh-node.mjs --root "\\192.168.8.164\dsh-mesh" --node LMM-3 `
 
 ```powershell
 node test/mesh-core.test.mjs    # 假执行器：DAG、重试、租约接管、幂等、环检测
+node test/mesh-m3.test.mjs      # 模板、能力路由、通道槽位、优先级、背压
 ```
 
 ## 已知限制
